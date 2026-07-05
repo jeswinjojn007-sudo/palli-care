@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="form-box">
+
+    <h2 class="form-title">Welcome Back</h2>
+
+    <!-- ✅ FLASH MESSAGE -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %} text-center">
+              {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <!-- Fake fields to catch browser autofill -->
+    <div style="position: absolute; overflow: hidden; height: 0; width: 0;">
+        <input type="text" name="fake_user" tabindex="-1" value="">
+        <input type="password" name="fake_password" tabindex="-1" value="">
+    </div>
+
+    <!-- ✅ LOGIN FORM (With anti-autofill tricks) -->
+    <form method="POST" autocomplete="off" id="loginForm">
+        <div class="mb-3 position-relative">
+            <i class="fas fa-user position-absolute top-50 translate-middle-y ms-3 opacity-50"></i>
+            <input class="ps-5" type="text" name="u_auth" id="u_auth" placeholder="Username" required 
+                   autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');">
+        </div>
+        <div class="mb-4 position-relative">
+            <i class="fas fa-lock position-absolute top-50 translate-middle-y ms-3 opacity-50"></i>
+            <input class="ps-5" type="password" name="p_auth" id="p_auth" placeholder="Password" required 
+                   autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');">
+        </div>
+
+        <button class="btn btn-glow w-100 mb-4">LOGIN <i class="fas fa-sign-in-alt ms-2"></i></button>
+    </form>
+
+    <script>
+        // Force clear fields on load to defeat aggressive browser caching
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('u_auth').value = '';
+                document.getElementById('p_auth').value = '';
+            }, 10);
+        });
+    </script>
+
+    <!-- ✅ LINKS -->
+    <div class="text-center mb-3">
+        <a href="/forgot_password" class="link small">Forgot Password?</a>
+    </div>
+
+    <div class="text-center mb-4">
+        <span class="opacity-75">Don't have an account?</span>
+        <a href="/signup" class="link fw-bold ms-1">Signup</a>
+    </div>
+
+    <div class="pt-3 border-top border-secondary border-opacity-10">
+        <a href="/" class="btn btn-outline w-100">
+            <i class="fas fa-home me-2"></i> Back to Home
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

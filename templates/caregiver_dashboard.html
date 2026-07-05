@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-4">
+
+    <!-- ✅ FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert 
+              {% if category == 'success' %}
+                  alert-success
+              {% else %}
+                  alert-danger
+              {% endif %}
+              text-center mx-auto mt-2 mb-4" style="max-width: 800px; border-radius: 12px; letter-spacing: 1px; font-weight: 500;">
+              {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- ✅ DAILY WELL-BEING SECTION (Removed redundant SOS) -->
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-white mb-2" style="text-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 2.5rem;">Caregiver Dashboard</h2>
+        <div class="mx-auto" style="max-width: 600px; font-style: italic; color: #a3c1ad; font-size: 0.95rem; letter-spacing: 0.5px;">
+            "The closest thing to being cared for is to care for someone else." — Kindness Matters ✨
+        </div>
+    </div>
+
+    <!-- ✅ UPPER SECTION: VITALS (EXACT SCREENSHOT MATCH) -->
+    <div class="mx-auto mb-5" style="max-width: 950px; background: rgba(43, 61, 47, 0.85); border-radius: 20px; padding: 40px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); backdrop-filter: blur(10px);">
+        
+        <div class="row align-items-center">
+            
+            <!-- LEFT: Patient Comfort Score -->
+            <div class="col-md-4 text-center" style="border-right: 1px solid rgba(255,255,255,0.1);">
+                <div class="comfort-gauge mb-3">
+                    <svg class="gauge-svg" width="140" height="140">
+                        <circle class="bg" cx="70" cy="70" r="60"></circle>
+                        <circle class="progress" cx="70" cy="70" r="60" style="stroke-dashoffset: {{ 377 - (3.77 * stats.comfort_score|float) }}; stroke: #dcb37b;"></circle>
+                    </svg>
+                    <div class="gauge-inner">
+                        <span class="gauge-value">{{ stats.comfort_score }}%</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold text-white mb-2">Patient Comfort Score</h5>
+                <small style="color: #bbb;">Based on Today's logs</small>
+            </div>
+
+            <!-- RIGHT: Daily Well-being Status -->
+            <div class="col-md-8 pl-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 px-3">
+                    <h4 class="fw-bold text-white m-0">Daily Well-being Status</h4>
+                    <button class="btn btn-sm text-white border-0 shadow-sm" data-bs-toggle="modal" data-bs-target="#updateStatsModal" style="background: rgba(139, 168, 148, 0.8); border-radius: 25px; padding: 8px 18px; font-weight: 600; cursor: pointer;">Update Stats</button>
+                </div>
+
+                <div class="row g-3 px-3 text-center">
+                    <div class="col-md-4">
+                        <div class="p-3 shadow-sm" style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; transition: transform 0.2s;">
+                            <div class="fs-2 mb-2">{{ stats.mood_icon }}</div>
+                            <div class="fw-bold text-white">Mood</div>
+                            <small class="text-uppercase" style="color: #ddd;">{{ stats.mood }}</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 shadow-sm" style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; transition: transform 0.2s;">
+                            <div class="fs-2 mb-2">{{ stats.sleep_icon }}</div>
+                            <div class="fw-bold text-white">Sleep</div>
+                            <small class="text-uppercase" style="color: #ddd;">{{ stats.sleep }}</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 shadow-sm" style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; transition: transform 0.2s;">
+                            <div class="fs-2 mb-2">💊</div>
+                            <div class="fw-bold text-white">Tasks</div>
+                            <small style="color: #ddd;">Completed {{ stats.tasks }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ✅ MIDDLE SECTION: GRID MENU -->
+    <div class="row g-4">
+
+        <!-- AI Prediction -->
+        <div class="col-md-3">
+            <div class="dashboard-card text-center p-4">
+                <div class="icon">🤖</div>
+                <h5 class="fw-bold mb-3 mt-2">AI Prediction</h5>
+                <a href="/symptoms" class="btn rounded-pill w-100" style="background: rgba(139, 168, 148, 0.8);">Enter</a>
+            </div>
+        </div>
+
+        <!-- Booking -->
+        <div class="col-md-3">
+            <div class="dashboard-card text-center p-4">
+                <div class="icon">📅</div>
+                <h5 class="fw-bold mb-3 mt-2">Book Service</h5>
+                <a href="/booking" class="btn rounded-pill w-100" style="background: rgba(139, 168, 148, 0.8);">Book</a>
+            </div>
+        </div>
+
+        <!-- My Bookings -->
+        <div class="col-md-3">
+            <div class="dashboard-card text-center p-4">
+                <div class="notification-badge">2</div>
+                <div class="icon">📋</div>
+                <h5 class="fw-bold mb-3 mt-2">My Bookings</h5>
+                <a href="/view_bookings" class="btn rounded-pill w-100" style="background: rgba(139, 168, 148, 0.8);">View</a>
+            </div>
+        </div>
+
+        <!-- Ambulance -->
+        <div class="col-md-3">
+            <div class="dashboard-card text-center p-4">
+                <div class="icon">🚑</div>
+                <h5 class="fw-bold mb-3 mt-2">Ambulance</h5>
+                <a href="/ambulance" class="btn rounded-pill w-100" style="background: rgba(139, 168, 148, 0.8);">View</a>
+            </div>
+        </div>
+
+        <!-- Nurse Availability -->
+        <div class="col-md-3">
+            <div class="dashboard-card text-center p-4">
+                <div class="icon">🧑‍⚕️</div>
+                <h5 class="fw-bold mb-3 mt-2">Nurse Availability</h5>
+                <a href="/nurse_availability" class="btn rounded-pill w-100" style="background: rgba(139, 168, 148, 0.8);">Check</a>
+            </div>
+        </div>
+
+        <!-- Equipment Availability -->
+        <div class="col-md-3">
+            <div class="dashboard-card text-center p-4">
+                <div class="icon">🩺</div>
+                <h5 class="fw-bold mb-3 mt-2">Equipment Availability</h5>
+                <a href="/medical_items" class="btn rounded-pill w-100" style="background: rgba(139, 168, 148, 0.8);">Check</a>
+            </div>
+        </div>
+
+        <!-- AI Chatbot -->
+        <div class="col-md-3">
+            <div class="dashboard-card text-center p-4">
+                <div class="icon">💬</div>
+                <h5 class="fw-bold mb-3 mt-2">AI Chatbot</h5>
+                <a href="/chatbot" class="btn rounded-pill w-100" style="background: rgba(139, 168, 148, 0.8);">Chat</a>
+            </div>
+        </div>
+
+        <!-- Tutorials -->
+        <div class="col-md-3">
+            <div class="dashboard-card text-center p-4">
+                <div class="icon">🎬</div>
+                <h5 class="fw-bold mb-3 mt-2">Tutorials</h5>
+                <a href="/tutorials" class="btn rounded-pill w-100" style="background: rgba(139, 168, 148, 0.8);">Watch</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ✅ ACTIVE ITEM BOOKINGS (NEW) -->
+    {% if active_items %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <div style="background: rgba(43, 61, 47, 0.85); border-radius: 20px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); backdrop-filter: blur(10px);">
+                <h4 class="text-white fw-bold mb-4">🏠 Currently Borrowed Equipment</h4>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Return By</th>
+                                <th>Status</th>
+                                <th>Admin Notes</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in active_items %}
+                            {% set is_overdue = false %}
+                            {% if item.return_date and today_date %}
+                                {% if (item.return_date | string) < (today_date | string) and item.status == 'In Use' %}
+                                    {% set is_overdue = true %}
+                                {% endif %}
+                            {% endif %}
+                            <tr {% if is_overdue %}style="background: rgba(220, 53, 69, 0.1);"{% endif %}>
+                                <td class="fw-bold text-white">
+                                    {{ item.item_name }}
+                                    {% if is_overdue %}
+                                        <div class="small text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> OVERDUE</div>
+                                    {% endif %}
+                                </td>
+                                <td class="small">{{ item.return_date or 'N/A' }}</td>
+                                <td>
+                                    {% if item.status == 'In Use' %}
+                                        <span class="badge bg-success">In Use</span>
+                                    {% elif item.status == 'Pending' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-white-50">
+                                    {% if item.admin_notes %}
+                                        <div class="p-2 rounded bg-dark" style="max-width: 200px;">
+                                            <i class="fas fa-comment ms-1 text-info"></i> {{ item.admin_notes }}
+                                        </div>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.status == 'In Use' %}
+                                    <form action="/finish_item/{{ item.id }}" method="POST">
+                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                            Finished Using
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                        <span class="text-white-50 small font-italic">Waiting for approval...</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ✅ LOWER SECTION: VITALS CHART -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div style="background: rgba(43, 61, 47, 0.85); border-radius: 20px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); backdrop-filter: blur(10px);">
+                <canvas id="vitalsChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ✅ CHART.JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('vitalsChart').getContext('2d');
+        
+        // Colors matching screenshot
+        const heartRateColor = '#ff3366';
+        const o2Color = '#00bfff';
+        const bpColor = '#00ffcc';
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels | safe }},
+                datasets: [
+                    {
+                        label: 'Heart Rate (bpm)',
+                        data: {{ chart_hr | safe }},
+                        borderColor: heartRateColor,
+                        backgroundColor: 'rgba(255, 51, 102, 0.2)',
+                        borderWidth: 4,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 2,
+                        pointHoverRadius: 6,
+                        spanGaps: true,
+                        cubicInterpolationMode: 'monotone'
+                    },
+                    {
+                        label: 'O2 Saturation (%)',
+                        data: {{ chart_o2 | safe }},
+                        borderColor: o2Color,
+                        backgroundColor: 'rgba(0, 191, 255, 0.2)',
+                        borderWidth: 4,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 2,
+                        pointHoverRadius: 6,
+                        spanGaps: true,
+                        cubicInterpolationMode: 'monotone'
+                    },
+                    {
+                        label: 'Systolic BP (mmHg)',
+                        data: {{ chart_bp | safe }},
+                        borderColor: bpColor,
+                        backgroundColor: 'rgba(0, 255, 204, 0.2)',
+                        borderWidth: 4,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 2,
+                        pointHoverRadius: 6,
+                        spanGaps: true,
+                        cubicInterpolationMode: 'monotone'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#cccccc',
+                            usePointStyle: false,
+                            boxWidth: 40,
+                            padding: 20
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#cccccc', maxRotation: 45, minRotation: 45 },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        ticks: { color: '#cccccc' },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        beginAtZero: false,
+                        title: { display: true, text: 'Clinical Values', color: '#888' }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}
+
+{% block extra_modals %}
+<!-- ✅ UPDATE STATS MODAL -->
+<div class="modal fade" id="updateStatsModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(5px); z-index: 1070;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background: rgba(30, 45, 35, 0.95); border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-white">Update Patient Logs</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/update_stats" method="POST">
+          <div class="modal-body text-white">
+              <div class="mb-3">
+                  <label class="form-label" style="color:#e3cd9c;">Comfort Score (%)</label>
+                  <input type="number" class="form-control bg-dark text-white border-secondary" name="comfort_score" min="0" max="100" value="{{ stats.comfort_score }}" required>
+              </div>
+              <div class="mb-3">
+                  <label class="form-label" style="color:#e3cd9c;">Mood</label>
+                  <select name="mood" class="form-control bg-dark text-white border-secondary" required>
+                      <option value="Happy" {% if stats.mood == 'Happy' %}selected{% endif %}>Happy</option>
+                      <option value="Neutral" {% if stats.mood == 'Neutral' %}selected{% endif %}>Neutral</option>
+                      <option value="Sad" {% if stats.mood == 'Sad' %}selected{% endif %}>Sad</option>
+                      <option value="Anxious" {% if stats.mood == 'Anxious' %}selected{% endif %}>Anxious</option>
+                      <option value="In Pain" {% if stats.mood == 'In Pain' %}selected{% endif %}>In Pain</option>
+                  </select>
+              </div>
+              <div class="mb-3">
+                  <label class="form-label" style="color:#e3cd9c;">Sleep Quality</label>
+                  <select name="sleep" class="form-control bg-dark text-white border-secondary" required>
+                      <option value="Sound" {% if stats.sleep == 'Sound' %}selected{% endif %}>Sound</option>
+                      <option value="Restless" {% if stats.sleep == 'Restless' %}selected{% endif %}>Restless</option>
+                      <option value="Interrupted" {% if stats.sleep == 'Interrupted' %}selected{% endif %}>Interrupted</option>
+                      <option value="Minimal" {% if stats.sleep == 'Minimal' %}selected{% endif %}>Minimal</option>
+                  </select>
+              </div>
+              <div class="mb-3">
+                  <label class="form-label" style="color:#e3cd9c;">Tasks Completed (e.g. 4/5)</label>
+                  <input type="text" class="form-control bg-dark text-white border-secondary" name="tasks" value="{{ stats.tasks }}" required>
+              </div>
+              <hr class="border-secondary my-4">
+              <h6 class="mb-3 text-center" style="color:#dcb37b; letter-spacing: 1px;">Todays Vitals</h6>
+              <div class="row g-2">
+                  <div class="col-4 text-center">
+                      <label class="form-label mb-1" style="font-size:12px; color:#ff3366;">Heart Rate</label>
+                      <input type="number" class="form-control bg-dark text-white border-secondary text-center" name="heart_rate" placeholder="75" required>
+                  </div>
+                  <div class="col-4 text-center">
+                      <label class="form-label mb-1" style="font-size:12px; color:#00bfff;">O2 Sat (%)</label>
+                      <input type="number" class="form-control bg-dark text-white border-secondary text-center" name="o2" placeholder="98" required>
+                  </div>
+                  <div class="col-4 text-center">
+                      <label class="form-label mb-1" style="font-size:12px; color:#00ffcc;">Systolic BP</label>
+                      <input type="number" class="form-control bg-dark text-white border-secondary text-center" name="bp" placeholder="120" required>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer border-0 pb-4 justify-content-center">
+              <button type="submit" class="btn text-dark fw-bold px-5 py-2" style="background: linear-gradient(135deg, #dcb37b, #b58d55); border-radius: 30px; letter-spacing: 1px;">💾 SAVE STATS</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Global SOS Modal & Scripts moved to base.html -->
+
+{% endblock %}

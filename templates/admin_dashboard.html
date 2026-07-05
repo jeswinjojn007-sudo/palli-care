@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="text-center mb-5">
+        <h2 class="form-title">👑 Admin Control Panel</h2>
+        <p class="text-light opacity-75">Platform Management & Emergency Oversight</p>
+    </div>
+    
+    <!-- ✅ PENDING APPROVALS NOTIFICATION -->
+    {% if pending_services > 0 or pending_items > 0 %}
+    <div class="alert alert-warning border-warning border-opacity-25 py-4 mb-5 shadow-lg d-flex align-items-center justify-content-between px-5" style="background: rgba(43, 40, 30, 0.9); border-radius: 20px;">
+        <div class="d-flex align-items-center gap-4">
+            <div class="fs-1"><i class="fas fa-hourglass-half text-warning animate-spin-slow"></i></div>
+            <div class="text-start">
+                <h4 class="fw-bold text-white mb-1">Pending Approvals</h4>
+                <p class="mb-0 text-light opacity-75">
+                    You have <b>{{ pending_services }}</b> service requests and <b>{{ pending_items }}</b> equipment requests waiting.
+                </p>
+            </div>
+        </div>
+        <a href="/admin_approvals" class="btn btn-warning fw-bold px-4 py-3 rounded-pill">REVIEW NOW <i class="fas fa-arrow-right ms-2"></i></a>
+    </div>
+    <style>
+        .animate-spin-slow { animation: fa-spin 5s infinite linear; }
+    </style>
+    {% endif %}
+
+    <!-- ✅ EMERGENCY SOS BANNER CONTAINER -->
+    <div id="sosContainer" class="d-none alert alert-danger border-danger border-2 text-center py-4 mb-5 shadow-lg animate-pulse" style="background: rgba(45, 10, 10, 0.95); border-radius: 20px;">
+        <h3 class="fw-bold text-white mb-3">🚨 EMERGENCY SOS ACTIVE 🚨</h3>
+        <p class="text-danger fw-bold fs-5 mb-4" id="sosMessage"></p>
+        
+        <form id="sosForm" method="POST" action="" class="max-width-600 mx-auto">
+            <div class="mb-3">
+                <input type="text" name="admin_message" class="form-control text-center py-3" placeholder="Enter resolution message for caregiver..." required>
+            </div>
+            <button type="submit" class="btn btn-danger btn-lg px-5">RESOLVE & DISPATCH HELP</button>
+        </form>
+    </div>
+
+    <style>
+    .animate-pulse { animation: sos-pulse 1.5s infinite; }
+    @keyframes sos-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { box-shadow: 0 0 0 20px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+    </style>
+
+    <!-- Audio element for siren -->
+    <audio id="sosAlarm" loop>
+        <source src="https://assets.mixkit.co/active_storage/sfx/995/995-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- ✅ STATS SECTION -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="dashboard-card text-center py-5">
+                <div class="icon fs-1 opacity-50 mb-3"><i class="fas fa-users"></i></div>
+                <h5 class="text-light opacity-75">Total Users registered</h5>
+                <h2 class="display-4 fw-bold text-white">{{ users }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="dashboard-card text-center py-5">
+                <div class="icon fs-1 opacity-50 mb-3"><i class="fas fa-calendar-check"></i></div>
+                <h5 class="text-light opacity-75">Total Active Bookings</h5>
+                <h2 class="display-4 fw-bold text-white">{{ bookings }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ QUICK ACTIONS -->
+    <div class="row g-4 justify-content-center">
+        <div class="col-6 col-md-3">
+            <a href="/view_all_bookings" class="dashboard-card text-center p-4 d-block text-decoration-none">
+                <div class="icon mb-3"><i class="fas fa-list-alt fs-2"></i></div>
+                <h6 class="text-white mb-0">View All Bookings</h6>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/manage_users" class="dashboard-card text-center p-4 d-block text-decoration-none">
+                <div class="icon mb-3"><i class="fas fa-user-cog fs-2"></i></div>
+                <h6 class="text-white mb-0">Manage Users</h6>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/view_item_bookings" class="dashboard-card text-center p-4 d-block text-decoration-none">
+                <div class="icon mb-3"><i class="fas fa-history fs-2"></i></div>
+                <h6 class="text-white mb-0">Equipment Tracker</h6>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/manage_ambulances" class="dashboard-card text-center p-4 d-block text-decoration-none">
+                <div class="icon mb-3"><i class="fas fa-ambulance fs-2"></i></div>
+                <h6 class="text-white mb-0">Ambulance Fleet</h6>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/manage_tutorials" class="dashboard-card text-center p-4 d-block text-decoration-none">
+                <div class="icon mb-3"><i class="fas fa-video fs-2 text-info"></i></div>
+                <h6 class="text-white mb-0">Care Tutorials</h6>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+let lastAlarmState = false;
+
+function checkSOS() {
+    fetch('/api/check_sos')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('sosContainer');
+            const alarm = document.getElementById('sosAlarm');
+            const form = document.getElementById('sosForm');
+            const message = document.getElementById('sosMessage');
+
+            if (data.status === 'active' && data.emergencies && data.emergencies.length > 0) {
+                // Show banner
+                container.classList.remove('d-none');
+                
+                // Get the most recent one
+                const latest = data.emergencies[0];
+                message.innerText = `ACTIVE SOS FROM CAREGIVER: ${latest.caregiver.toUpperCase()} (${latest.time})`;
+                form.action = `/resolve_sos/${latest.id}`;
+                
+                // Play alarm if not already playing
+                if (!lastAlarmState) {
+                    alarm.play().catch(e => console.log('Audio autoplay prevented:', e));
+                    lastAlarmState = true;
+                }
+            } else {
+                // Hide and stop
+                container.classList.add('d-none');
+                
+                if (lastAlarmState) {
+                    alarm.pause();
+                    alarm.currentTime = 0;
+                    lastAlarmState = false;
+                }
+            }
+        })
+        .catch(error => console.error('Error checking SOS:', error));
+}
+
+// Check immediately and then every 5 seconds
+checkSOS();
+setInterval(checkSOS, 5000);
+</script>
+
+{% endblock %}
