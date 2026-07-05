@@ -1,0 +1,37 @@
+{
+  "id": "pallicare-app",
+  "name": "AI Palliative Care",
+  "short_name": "PalliCare",
+  "description": "Premium AI-driven palliative care platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121914",
+  "theme_color": "#dcb37b",
+  "categories": ["medical", "health"],
+  "icons": [
+    {
+      "src": "/static/images/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/images/pwa-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/pwa-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
